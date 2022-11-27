@@ -33,6 +33,9 @@ protected:
 	// Moves the character forward/backwards. Values from -1 to 0 and from 0 to 1 (Image a joystick)
 	void MoveForward(float Value);
 
+	// Move the character left/right
+	void MoveRight(float Value);
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
