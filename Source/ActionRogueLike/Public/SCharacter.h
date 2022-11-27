@@ -14,6 +14,14 @@ class ACTIONROGUELIKE_API ASCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+protected:
+	// Allows us to assign a class (it could be an actor, pawn, character or in this case our Magic Projectile because Magic Projectile
+	// derives from actor.
+	// Make sure to add an UPROPERTY to make sure that this is visible from the editor and that we can actually assign a variable.
+	UPROPERTY(EditAnywhere)
+	// MAKE SURE TO ASSIGN THIS IN BLUEPRINT (Click on the PlayerCharacter BluePrint and search for "ProjectileClass" on the write side and assign the MagicProjectileBP (blue print))
+	TSubclassOf<AActor> ProjectileClass;
+
 public:
 	// Sets default values for this character's properties
 	ASCharacter();
@@ -35,6 +43,9 @@ protected:
 
 	// Move the character left/right
 	void MoveRight(float Value);
+
+	// Trigger the Primary Attack Animation.
+	void PrimaryAttack();
 
 public:	
 	// Called every frame

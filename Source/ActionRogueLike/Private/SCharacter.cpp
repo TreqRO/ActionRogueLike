@@ -18,7 +18,7 @@ ASCharacter::ASCharacter()
 	// Allows the user to move the camera without moving the pawn
 	// Boleans start with b
 	SpringArmComp->bUsePawnControlRotation = true;
-	// Make sure that the spring arm is properly attached to the character
+	// Make sure that the spring arm is properly attached to the character (which is in this case the root component)
 	SpringArmComp->SetupAttachment(RootComponent);
 
 	//  Rotate our character to whatever we're currently moving towards (Gets rids of the sideway movement.)
@@ -32,7 +32,7 @@ ASCharacter::ASCharacter()
 	// Attach the camera to the spring (hence 3rd person)
 	CameraComp->SetupAttachment(SpringArmComp);
 
-
+	
 }
 
 // Called when the game starts or when spawned
@@ -79,6 +79,28 @@ void ASCharacter::MoveRight(float Value)
 	AddMovementInput(RightVector, Value);
 }
 
+void ASCharacter::PrimaryAttack()
+{
+	// Get the Right Hand Location 
+	FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
+
+
+	//SpawnTM (Spawn Transform Matrix) is a transform. A transform is a struct that holds a rotation, location,  and a scale.
+	// ROTATION = The control location (where we are looking at)
+	// LOCATION  = It will spawn the projectile from right hand (combine it later with an attack animation (puts his hand forward) )
+	FTransform SpawnTM = FTransform(GetControlRotation(), HandLocation);
+
+	//F actor SpawnParams just holding a ton of optional paramters for us to use.
+	FActorSpawnParameters SpawnParams;
+	//Allows us to specify the spawn rules (because when the object gets spawned in the world it will check its collision
+	// and see like can I move myself a little bit to not overlap with anything when I spawn? But we just want to always spawn since
+	// we're spawning ourselves in that character now it will not be able to even adjust itself a little bit.
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	//Spawn the Primary Attack Projectile
+	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
+}
+
 // Called every frame
 void ASCharacter::Tick(float DeltaTime)
 {
@@ -97,6 +119,9 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	// Adds Yaw as input (horizontal rotation)
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
+
+	//Making sure that we as the player can spawn the SMagicProjectile (By prssing a key hence we bind it to an action)
+	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &ASCharacter::PrimaryAttack);
 
 }
 
