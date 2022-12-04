@@ -2,9 +2,12 @@
 
 
 #include "SCharacter.h"
+
+#include "SInteractionComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "SInteractionComponent.h"
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -31,6 +34,8 @@ ASCharacter::ASCharacter()
 	CameraComp = CreateDefaultSubobject<UCameraComponent>("CameraComp");
 	// Attach the camera to the spring (hence 3rd person)
 	CameraComp->SetupAttachment(SpringArmComp);
+
+	InteractionComp = CreateDefaultSubobject<USInteractionComponent>("interactionComp");
 
 	
 }
@@ -101,10 +106,11 @@ void ASCharacter::PrimaryAttack()
 	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
 }
 
-//void ASCharacter::Jump()
-//{
-//	
-//}
+void ASCharacter::PrimaryInteract()
+{
+	// Opens up the chess
+	InteractionComp->PrimaryInteract();
+}
 
 // Called every frame
 void ASCharacter::Tick(float DeltaTime)
@@ -130,6 +136,9 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 	//Makes the character jump
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASCharacter::Jump);
+
+	//Makes the character jump
+	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &ASCharacter::PrimaryInteract);
 }
 
 
