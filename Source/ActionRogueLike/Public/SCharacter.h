@@ -47,6 +47,7 @@ protected:
 	// Trigger the Primary Attack Animation.
 	void PrimaryAttack();
 
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

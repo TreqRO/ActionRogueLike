@@ -101,6 +101,11 @@ void ASCharacter::PrimaryAttack()
 	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
 }
 
+//void ASCharacter::Jump()
+//{
+//	
+//}
+
 // Called every frame
 void ASCharacter::Tick(float DeltaTime)
 {
@@ -123,6 +128,8 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	//Making sure that we as the player can spawn the SMagicProjectile (By prssing a key hence we bind it to an action)
 	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &ASCharacter::PrimaryAttack);
 
+	//Makes the character jump
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASCharacter::Jump);
 }
 
 
