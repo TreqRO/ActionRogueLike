@@ -86,6 +86,26 @@ void ASCharacter::MoveRight(float Value)
 
 void ASCharacter::PrimaryAttack()
 {
+	// Plays the animation we pass in the Editor blue print!
+	PlayAnimMontage(AttackAnim);
+
+	//The time handle is just another struct which hold a handle to this timer. For example if we want to stop this timer before it started, we just
+	// get the timer and we use that to clear it but we need to know which timer are we talking about.
+
+	//If our character does die we want to cancel that attack since he already died.
+	//Example below for this case
+	//GetWorldTimerManager().ClearTimer(TimerHandle_PrimaryAttack);
+	
+
+	// Add a timer so the Projectile will spawn when the hand is fully extended during the animation
+	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ASCharacter::PrimaryAttack_TimeElapsed, 0.2f);
+
+
+}
+
+// Trigger attack after delay
+void ASCharacter::PrimaryAttack_TimeElapsed()
+{
 	// Get the Right Hand Location 
 	FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
 
@@ -108,7 +128,7 @@ void ASCharacter::PrimaryAttack()
 
 void ASCharacter::PrimaryInteract()
 {
-	// Opens up the chess
+	// Opens up the chest if its in the line of sight
 	InteractionComp->PrimaryInteract();
 }
 

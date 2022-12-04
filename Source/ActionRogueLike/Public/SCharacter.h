@@ -10,6 +10,7 @@
 class UCameraComponent;
 class USpringArmComponent;
 class USInteractionComponent;
+class UAnimMontage;
 
 UCLASS()
 class ACTIONROGUELIKE_API ASCharacter : public ACharacter
@@ -20,9 +21,16 @@ protected:
 	// Allows us to assign a class (it could be an actor, pawn, character or in this case our Magic Projectile because Magic Projectile
 	// derives from actor.
 	// Make sure to add an UPROPERTY to make sure that this is visible from the editor and that we can actually assign a variable.
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Attack")
 	// MAKE SURE TO ASSIGN THIS IN BLUEPRINT (Click on the PlayerCharacter BluePrint and search for "ProjectileClass" on the write side and assign the MagicProjectileBP (blue print))
 	TSubclassOf<AActor> ProjectileClass;
+
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	// The Attack Animation WHICH IS PASSED IN THE EDITOR!
+	UAnimMontage* AttackAnim;
+
+	FTimerHandle TimerHandle_PrimaryAttack;
+
 
 public:
 	// Sets default values for this character's properties
@@ -51,6 +59,9 @@ protected:
 
 	// Trigger the Primary Attack Animation.
 	void PrimaryAttack();
+
+	// Trigger attack after delay
+	void PrimaryAttack_TimeElapsed();
 
 	//Trigger the Primary Interact
 	void PrimaryInteract();
