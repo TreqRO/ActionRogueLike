@@ -25,7 +25,8 @@ public:
 	//We want to implement this not only in c++ but also in blueprint hence we need to expose this function to the blueprints.
 	//BlueprintImplementationEvent: ONLY ALLOWS YOU TO HAVE AN IMPLEMENTATION IN BLUEPRINT NOT C++ Even though the baseclass is implemented in c++.
 	//BlueprintNativeEvent: IMPLEMENTATION ON BOTH BLUEPRINT AND C++ ALLOWED
-	UFUNCTION(BlueprintNativeEvent)
+	//BluePrintCallable allows you to call it in BluePrint
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	// Because we want to have some sort of context of who was using/trigeering it(the health pot), we pass along our player which would be
 	// the instigator pawn. TLDR: We know who triggered the health position hence to whom we should apply the effect. 
 	void Interact(APawn* InstigatorPawn);
