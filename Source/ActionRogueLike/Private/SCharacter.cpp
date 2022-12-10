@@ -122,6 +122,9 @@ void ASCharacter::PrimaryAttack_TimeElapsed()
 	// we're spawning ourselves in that character now it will not be able to even adjust itself a little bit.
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
+	//Pass the instigator (the character that had spawn the projectile attack)
+	SpawnParams.Instigator = this;
+
 	//Spawn the Primary Attack Projectile
 	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
 }

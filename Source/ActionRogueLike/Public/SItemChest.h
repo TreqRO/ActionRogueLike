@@ -31,7 +31,8 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* BaseMesh;
 
-	UPROPERTY(VisibleAnywhere)
+	// BlueprintReadOnly allows you to use it on the event graph (blueprint to animate the opening of the lid)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly);
 	UStaticMeshComponent* LidMesh;
 
 	// Called when the game starts or when spawned
