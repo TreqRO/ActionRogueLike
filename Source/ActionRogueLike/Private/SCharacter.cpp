@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "SInteractionComponent.h"
+#include "ProfilingDebugging/CookStats.h"
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -116,11 +117,66 @@ void ASCharacter::PrimaryAttack_TimeElapsed()
 		// Get the Right Hand Location 
 		FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
 
+		//PROBLEM: PROJECTILE DONT HIT WHERE THE PLAYER EXPECTS (under crosshair) (01:09 Assign2)
+		// SOLUTION: Recalculate new projectile spawn rotation by using:
+		// Spawn Location (Hand Position)
+		// Impact Location (Line Trace Result)
+		// Line trace object from the Center of the Camera to the first Object found (if any)
 
-		//SpawnTM (Spawn Transform Matrix) is a transform. A transform is a struct that holds a rotation, location,  and a scale.
-		// ROTATION = The control location (where we are looking at)
-		// LOCATION  = It will spawn the projectile from right hand (combine it later with an attack animation (puts his hand forward) )
-		FTransform SpawnTM = FTransform(GetControlRotation(), HandLocation);
+		FCollisionObjectQueryParams ObjectQueryParams;
+		ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+		ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldStatic);
+		ObjectQueryParams.AddObjectTypesToQuery(ECC_PhysicsBody);
+
+		// Fills the hit information
+		FHitResult Hit;
+		//TArray<FHitResult>Hits;
+		//FCollisionShape Shape;
+
+		// Camera Location and Rotation
+		APlayerCameraManager* camManager = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
+		FVector camLocation = camManager->GetCameraLocation();
+		FVector camForward = camManager->GetCameraRotation().Vector();
+
+		// End Location for the line trace
+		FVector End = camLocation + (GetControlRotation().Vector() * 500000);
+
+		bool bBlockingHit = GetWorld()->LineTraceSingleByObjectType(Hit, camLocation, End, ObjectQueryParams);
+		//bool bBlockingHit = GetWorld()->SweepMultiByObjectType(Hits, camLocation, End, FQuat::Identity, ObjectQueryParams, Shape);
+		FTransform SpawnTM;
+		FRotator CalculatedRotationProjectile;
+
+
+		//for (FHitResult Hit : Hits) {
+			// In case the line trace hit an object
+		if (bBlockingHit)
+		{
+
+			AActor* HitActor = Hit.GetActor();
+			//FRotator Difference = (Hit.Location - HandLocation).Rotation();
+			CalculatedRotationProjectile = (Hit.Location - HandLocation).Rotation();
+
+			//SpawnTM (Spawn Transform Matrix) is a transform. A transform is a struct that holds a rotation, location,  and a scale.
+			// ROTATION = The control location (where we are looking at)
+			// LOCATION  = It will spawn the projectile from right hand (combine it later with an attack animation (puts his hand forward) )
+			//FTransform SpawnTM = FTransform(GetControlRotation(), HandLocation);
+			SpawnTM = FTransform(CalculatedRotationProjectile, HandLocation);
+			
+		}
+
+		// If nothing was hit, use 'trace end' vector as desired target
+		else
+		{
+			CalculatedRotationProjectile = (Hit.TraceEnd - HandLocation).Rotation();
+			SpawnTM = FTransform(CalculatedRotationProjectile, HandLocation);
+		}
+			//break;
+		//}
+
+		//(DRAWS STRAIGHT A LINE FROM Camera Center TO END POINT)
+		// Used for debugging
+		FColor LineColor = bBlockingHit ? FColor::Green : FColor::Red;
+		DrawDebugLine(GetWorld(), camLocation, End, LineColor, false, 2.0f, 0, 2.0f);
 
 		//F actor SpawnParams just holding a ton of optional paramters for us to use.
 		FActorSpawnParameters SpawnParams;
