@@ -106,27 +106,37 @@ void ASCharacter::PrimaryAttack()
 // Trigger attack after delay
 void ASCharacter::PrimaryAttack_TimeElapsed()
 {
-	// Get the Right Hand Location 
-	FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
+	// Aserts example for pro-active detection of bugs
+	// ensure only gives you an error once after compiling but then you can continue playing afterwards
+	// ensureAlways give you an error every time you press play (don't do this in Tick Function).
+	// Don't use check - Can't continue debugging afterwards
+	// ensure doesn't run in packaged games
+	if (ensure(ProjectileClass))
+	{
+		// Get the Right Hand Location 
+		FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
 
 
-	//SpawnTM (Spawn Transform Matrix) is a transform. A transform is a struct that holds a rotation, location,  and a scale.
-	// ROTATION = The control location (where we are looking at)
-	// LOCATION  = It will spawn the projectile from right hand (combine it later with an attack animation (puts his hand forward) )
-	FTransform SpawnTM = FTransform(GetControlRotation(), HandLocation);
+		//SpawnTM (Spawn Transform Matrix) is a transform. A transform is a struct that holds a rotation, location,  and a scale.
+		// ROTATION = The control location (where we are looking at)
+		// LOCATION  = It will spawn the projectile from right hand (combine it later with an attack animation (puts his hand forward) )
+		FTransform SpawnTM = FTransform(GetControlRotation(), HandLocation);
 
-	//F actor SpawnParams just holding a ton of optional paramters for us to use.
-	FActorSpawnParameters SpawnParams;
-	//Allows us to specify the spawn rules (because when the object gets spawned in the world it will check its collision
-	// and see like can I move myself a little bit to not overlap with anything when I spawn? But we just want to always spawn since
-	// we're spawning ourselves in that character now it will not be able to even adjust itself a little bit.
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		//F actor SpawnParams just holding a ton of optional paramters for us to use.
+		FActorSpawnParameters SpawnParams;
+		//Allows us to specify the spawn rules (because when the object gets spawned in the world it will check its collision
+		// and see like can I move myself a little bit to not overlap with anything when I spawn? But we just want to always spawn since
+		// we're spawning ourselves in that character now it will not be able to even adjust itself a little bit.
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	//Pass the instigator (the character that had spawn the projectile attack)
-	SpawnParams.Instigator = this;
+		//Pass the instigator (the character that had spawn the projectile attack)
+		SpawnParams.Instigator = this;
 
-	//Spawn the Primary Attack Projectile
-	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
+		//Spawn the Primary Attack Projectile
+		GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
+	}
+
+
 }
 
 void ASCharacter::PrimaryInteract()
