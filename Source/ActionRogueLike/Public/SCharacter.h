@@ -26,6 +26,9 @@ protected:
 	TSubclassOf<AActor> ProjectileClass;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
+	TSubclassOf<AActor> ProjectileBlackHoleClass;
+
+	UPROPERTY(EditAnywhere, Category = "Attack")
 	// The Attack Animation WHICH IS PASSED IN THE EDITOR!
 	UAnimMontage* AttackAnim;
 
@@ -65,6 +68,12 @@ protected:
 
 	//Trigger the Primary Interact
 	void PrimaryInteract();
+
+	//Trigger the BlackHoleAttack
+	void BlackholeAttack();
+
+	//Trigger the BlackHoleAttack after delay.
+	void BlackholeAttack_TimeElapsed();
 
 
 public:	

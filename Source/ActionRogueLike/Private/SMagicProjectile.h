@@ -3,15 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SSharedProjectileClass.h"
 #include "GameFramework/Actor.h"
 #include "SMagicProjectile.generated.h"
 
-class USphereComponent;
-class UProjectileMovementComponent;
-class UParticleSystemComponent;
+//MOVED INTO THE THE SHARED PROJECTILE CLASS (SSharedProjectileClass)
+//class USphereComponent;
+//class UProjectileMovementComponent;
+//class UParticleSystemComponent;
 
 UCLASS()
-class ASMagicProjectile : public AActor
+class ASMagicProjectile : public ASSharedProjectileClass
 {
 	GENERATED_BODY()
 	
@@ -21,17 +23,18 @@ public:
 
 protected:
 
-	// The collision component
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	USphereComponent* SphereComp;
+	//MOVED INTO THE THE SHARED PROJECTILE CLASS (SSharedProjectileClass)
+	//// The collision component
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	//USphereComponent* SphereComp;
 
-	// A component which we give a velocity and it will go in a straight line.
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	UProjectileMovementComponent* MovementComp;
+	//// A component which we give a velocity and it will go in a straight line.
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	//UProjectileMovementComponent* MovementComp;
 
-	// Particle system component just so that we have something to show in the world.
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	UParticleSystemComponent* EffectComp;
+	//// Particle system component just so that we have something to show in the world.
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	//UParticleSystemComponent* EffectComp;
 
 
 	// Called when the game starts or when spawned

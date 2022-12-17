@@ -187,6 +187,78 @@ void ASCharacter::PrimaryAttack_TimeElapsed()
 
 }
 
+void ASCharacter::BlackholeAttack()
+{
+	// Plays the animation we pass in the Editor blue print!
+	PlayAnimMontage(AttackAnim);
+
+	// Add a timer so the Projectile will spawn when the hand is fully extended during the animation
+	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ASCharacter::BlackholeAttack_TimeElapsed, 0.1f);
+}
+
+void ASCharacter::BlackholeAttack_TimeElapsed()
+{
+	if (ensure(ProjectileClass))
+	{
+		// Get the Right Hand Location 
+		FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
+
+		FCollisionObjectQueryParams ObjectQueryParams;
+		ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+		ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldStatic);
+		ObjectQueryParams.AddObjectTypesToQuery(ECC_PhysicsBody);
+
+		// Fills the hit information
+		FHitResult Hit;
+
+		// Camera Location and Rotation
+		APlayerCameraManager* camManager = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
+		FVector camLocation = camManager->GetCameraLocation();
+		//FVector camForward = camManager->GetCameraRotation().Vector();
+
+		// End Location for the line trace
+		FVector End = camLocation + (GetControlRotation().Vector() * 500000);
+
+		bool bBlockingHit = GetWorld()->LineTraceSingleByObjectType(Hit, camLocation, End, ObjectQueryParams);
+		FTransform SpawnTM;
+		FRotator CalculatedRotationProjectile;
+
+		// If an object was hit
+		if (bBlockingHit)
+		{
+
+			//AActor* HitActor = Hit.GetActor();
+			CalculatedRotationProjectile = (Hit.Location - HandLocation).Rotation();
+
+			//SpawnTM (Spawn Transform Matrix) is a transform. A transform is a struct that holds a rotation, location,  and a scale.
+			// ROTATION = The control location (where we are looking at)
+			// LOCATION  = It will spawn the projectile from right hand (combine it later with an attack animation (puts his hand forward) )
+			//FTransform SpawnTM = FTransform(GetControlRotation(), HandLocation);
+			SpawnTM = FTransform(CalculatedRotationProjectile, HandLocation);
+
+		}
+
+		// If nothing was hit, use 'trace end' vector as desired target
+		else
+		{
+			CalculatedRotationProjectile = (Hit.TraceEnd - HandLocation).Rotation();
+			SpawnTM = FTransform(CalculatedRotationProjectile, HandLocation);
+		}
+
+		//F actor SpawnParams just holding a ton of optional paramters for us to use.
+		FActorSpawnParameters SpawnParams;
+
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		//Pass the instigator (the character that had spawn the projectile attack)
+		SpawnParams.Instigator = this;
+
+		//Spawn the BlackHole Attack Projectile
+		GetWorld()->SpawnActor<AActor>(ProjectileBlackHoleClass, SpawnTM, SpawnParams);
+	}
+}
+
+
 void ASCharacter::PrimaryInteract()
 {
 	// Opens up the chest if its in the line of sight
@@ -215,11 +287,16 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	//Making sure that we as the player can spawn the SMagicProjectile (By prssing a key hence we bind it to an action)
 	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &ASCharacter::PrimaryAttack);
 
+	//Making sure that we as the player can spawn the SBlackholeProjectile (By prssing a key hence we bind it to an action)
+	PlayerInputComponent->BindAction("BlackholeAttack", IE_Pressed, this, &ASCharacter::BlackholeAttack);
+
 	//Makes the character jump
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASCharacter::Jump);
 
-
+	
 	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &ASCharacter::PrimaryInteract);
+
+
 }
 
 
