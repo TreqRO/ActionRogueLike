@@ -28,6 +28,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	TSubclassOf<AActor> ProjectileBlackHoleClass;
 
+	UPROPERTY(EditAnywhere, Category = "Dash")
+	TSubclassOf<AActor> ProjectileDashClass;
+
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	// The Attack Animation WHICH IS PASSED IN THE EDITOR!
 	UAnimMontage* AttackAnim;
@@ -74,6 +77,10 @@ protected:
 
 	//Trigger the BlackHoleAttack after delay.
 	void BlackholeAttack_TimeElapsed();
+
+	void Dash();
+
+	void Dash_TimeElapsed();
 
 
 public:	
