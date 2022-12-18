@@ -193,12 +193,12 @@ void ASCharacter::BlackholeAttack()
 	PlayAnimMontage(AttackAnim);
 
 	// Add a timer so the Projectile will spawn when the hand is fully extended during the animation
-	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ASCharacter::BlackholeAttack_TimeElapsed, 0.1f);
+	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ASCharacter::BlackholeAttack_TimeElapsed, 0.2f);
 }
 
 void ASCharacter::BlackholeAttack_TimeElapsed()
 {
-	if (ensure(ProjectileClass))
+	if (ensure(ProjectileBlackHoleClass))
 	{
 		// Get the Right Hand Location 
 		FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
