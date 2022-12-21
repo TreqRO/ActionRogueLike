@@ -325,6 +325,8 @@ void ASCharacter::Dash_TimeElapsed()
 
 		//Spawn the BlackHole Attack Projectile
 		GetWorld()->SpawnActor<AActor>(ProjectileDashClass, SpawnTM, SpawnParams);
+
+		
 	}
 }
 
