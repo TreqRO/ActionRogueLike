@@ -32,7 +32,7 @@ void ASDashProjectile::TeleportInstigatorAfterProjectileHit()
 void ASDashProjectile::OnActorHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 
-	//UE_LOG(LogTemp, Log, TEXT("OnActorHit in Dash Projectile"));
+	UE_LOG(LogTemp, Log, TEXT("OnActorHit in Dash Projectile"));
 	ProjectileTeleportAfterTimeElapsed();
 
 	//UGameplayStatics::SpawnEmitterAtLocation(this, ExplosionParticle, LocationProjectile, RotationProjectile);
@@ -51,7 +51,7 @@ void ASDashProjectile::OnActorHit(UPrimitiveComponent* HitComp, AActor* OtherAct
 
 void ASDashProjectile::ProjectileTeleport()
 {
-	//UE_LOG(LogTemp, Log, TEXT("ProjectileTeleport in Dash Projectile"));
+	UE_LOG(LogTemp, Log, TEXT("ProjectileTeleport in Dash Projectile"));
 	GetWorldTimerManager().SetTimer(TimerHandle_Projectile, this, &ASDashProjectile::ProjectileTeleportAfterTimeElapsed, 0.2f);
 }
 
@@ -68,13 +68,18 @@ void ASDashProjectile::ProjectileTeleportAfterTimeElapsed()
 }
 
 
+void ASDashProjectile::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	SphereComp->OnComponentHit.AddDynamic(this, &ASDashProjectile::OnActorHit);
 
+}
 
 // Called when the game starts or when spawned
 void ASDashProjectile::BeginPlay()
 {
 	Super::BeginPlay();
-	SphereComp->OnComponentHit.AddDynamic(this, &ASDashProjectile::OnActorHit);
+	
 	ProjectileTeleport();
 }
 
