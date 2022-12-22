@@ -8,7 +8,7 @@
 #include "SBlackholeProjectile.generated.h"
 
 UCLASS()
-class ASBlackholeProjectile : public ASSharedProjectileClass
+class ASBlackholeProjectile : public AActor
 {
 	GENERATED_BODY()
 	
@@ -17,6 +17,7 @@ public:
 	ASBlackholeProjectile();
 
 protected:
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 

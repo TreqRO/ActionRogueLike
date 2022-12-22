@@ -11,17 +11,56 @@
 // Sets default values
 ASDashProjectile::ASDashProjectile()
 {
-	PrimaryActorTick.bCanEverTick = true;
-	SphereComp = CreateDefaultSubobject<USphereComponent>("SphereComp");
-	RootComponent = SphereComp;
-	EffectComp = CreateDefaultSubobject<UParticleSystemComponent>("EffectComp");
-	EffectComp->SetupAttachment(SphereComp);
-	MovementComp = CreateDefaultSubobject<UProjectileMovementComponent>("MovementComp");
-	MovementComp->InitialSpeed = 1000.0f;
-	MovementComp->bRotationFollowsVelocity = true;
-	MovementComp->bInitialVelocityInLocalSpace = true;
+	//MOVED IN THE SHARED CLASS
+	TeleportDelay = 0.2f;
+	DetonateDelay = 0.2f;
+
+	MovementComp->InitialSpeed = 6000.0f;
+	
 }
 
+void ASDashProjectile::BeginPlay()
+{
+	Super::BeginPlay();
+
+	GetWorldTimerManager().SetTimer(TimerHandle_DelayedDetonate, this, &ASDashProjectile::Explode, DetonateDelay);
+}
+
+void ASDashProjectile::Explode_Implementation()
+{
+	// Clear timer if the Explode was already called through another source like OnActorHit
+	GetWorldTimerManager().ClearTimer(TimerHandle_DelayedDetonate);
+	UGameplayStatics::SpawnEmitterAtLocation(this, ImpactVFX, GetActorLocation(), GetActorRotation());
+
+	EffectComp->DeactivateSystem();
+
+	MovementComp->StopMovementImmediately();
+	SetActorEnableCollision(false);
+
+	FTimerHandle TimeHandle_DelayedTeleport;
+	GetWorldTimerManager().SetTimer(TimeHandle_DelayedTeleport, this, &ASDashProjectile::TeleportInstigator, TeleportDelay);
+}
+
+
+void ASDashProjectile::TeleportInstigator()
+{
+	AActor* ActorToTeleport = GetInstigator();
+	if(ensure(ActorToTeleport))
+	{
+		//Keep instigator rotation or it may end up jarring
+		ActorToTeleport->TeleportTo(GetActorLocation(), ActorToTeleport->GetActorRotation(), false, false);
+	}
+
+	Destroy();
+}
+
+
+
+	/*
+	 * MY WAY
+	 */
+
+/*
 void ASDashProjectile::TeleportInstigatorAfterProjectileHit()
 {
 	FRotator InstigatorRotation = InstigatorCharacter->GetActorRotation();
@@ -34,19 +73,6 @@ void ASDashProjectile::OnActorHit(UPrimitiveComponent* HitComp, AActor* OtherAct
 
 	//UE_LOG(LogTemp, Log, TEXT("OnActorHit in Dash Projectile"));
 	ProjectileTeleportAfterTimeElapsed();
-
-	//UGameplayStatics::SpawnEmitterAtLocation(this, ExplosionParticle, LocationProjectile, RotationProjectile);
-	//Binding the function with specific values
-	//TimerDel.BindUFunction(this, FName("TeleportInstigator"), InstigatorCharacter, LocationProjectile, RotationProjectile);
-	//InstigatorCharacter->TeleportTo(LocationProjectile, RotationProjectile);
-	//GetWorldTimerManager().SetTimer(TimerHandle_Projectile, TimerDel, 0.2f, false);
-	//GetWorld()->GetTimerManager().SetTimer(TimerHandle_Projectile,[&]() { this->TeleportInstigator(InstigatorCharacter, LocationProjectile, RotationProjectile); },0.2f, false);
-	//GetWorldTimerManager().SetTimer(TimerHandle_Projectile, this, &ASDashProjectile::TeleportInstigatorAfterProjectileHit, 0.2f);
-
-	//GetWorldTimerManager().SetTimer(TimerHandle_Projectile, 0.2f);
-
-	//GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ASCharacter::PrimaryAttack_TimeElapsed, 0.2f);
-
 }
 
 void ASDashProjectile::ProjectileTeleport()
@@ -90,3 +116,5 @@ void ASDashProjectile::Tick(float DeltaTime)
 
 }
 
+
+*/
