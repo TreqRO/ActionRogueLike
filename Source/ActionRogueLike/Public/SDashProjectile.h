@@ -18,19 +18,30 @@ class ASDashProjectile : public ASSharedProjectileClass
 public:	
 	// Sets default values for this actor's properties
 	ASDashProjectile();
-	void Teleport();
+	
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	void TeleportInstigatorAfterProjectileHit();
+
+	void ProjectileTeleport();
+	void ProjectileTeleportAfterTimeElapsed();
+
 	//virtual void PostInitializeComponents() override;
 	FTimerHandle TimerHandle_Projectile;
+	FTimerDelegate TimerDel;
+	AActor* InstigatorCharacter;
+	FRotator RotationProjectile;
+	FVector LocationProjectile;
 
 	// Must be marked with ufunction in order to 'bind' the event
 	UFUNCTION()
 	void OnActorHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	UParticleSystem* ExplosionParticle;
 
 public:	
 	// Called every frame

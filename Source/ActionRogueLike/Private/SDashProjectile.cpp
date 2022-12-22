@@ -4,7 +4,9 @@
 #include "SDashProjectile.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
+
 
 // Sets default values
 ASDashProjectile::ASDashProjectile()
@@ -20,18 +22,52 @@ ASDashProjectile::ASDashProjectile()
 	MovementComp->bInitialVelocityInLocalSpace = true;
 }
 
+void ASDashProjectile::TeleportInstigatorAfterProjectileHit()
+{
+	FRotator InstigatorRotation = InstigatorCharacter->GetActorRotation();
+	InstigatorCharacter->TeleportTo(LocationProjectile, InstigatorRotation);
+	Destroy();
+}
+
 void ASDashProjectile::OnActorHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	//OtherActor->TeleportTo()
-	AActor* InstigatorCharacter = GetInstigator();
-	FRotator RotationProjectile = SphereComp->GetComponentRotation();
-	FVector LocationProjectile = SphereComp->GetComponentLocation();
-	InstigatorCharacter->TeleportTo(LocationProjectile, RotationProjectile);
 
-	//Instigator->TeleportTo()
-	// Add a timer so the Projectile will spawn when the hand is fully extended during the animation
-	//GetWorldTimerManager().SetTimer(TimerHandle_Projectile, this, &ASDashProjectile::Dash_TimeElapsed, 0.2f);
+	UE_LOG(LogTemp, Log, TEXT("OnActorHit in Dash Projectile"));
+	ProjectileTeleportAfterTimeElapsed();
+
+	//UGameplayStatics::SpawnEmitterAtLocation(this, ExplosionParticle, LocationProjectile, RotationProjectile);
+	//Binding the function with specific values
+	//TimerDel.BindUFunction(this, FName("TeleportInstigator"), InstigatorCharacter, LocationProjectile, RotationProjectile);
+	//InstigatorCharacter->TeleportTo(LocationProjectile, RotationProjectile);
+	//GetWorldTimerManager().SetTimer(TimerHandle_Projectile, TimerDel, 0.2f, false);
+	//GetWorld()->GetTimerManager().SetTimer(TimerHandle_Projectile,[&]() { this->TeleportInstigator(InstigatorCharacter, LocationProjectile, RotationProjectile); },0.2f, false);
+	//GetWorldTimerManager().SetTimer(TimerHandle_Projectile, this, &ASDashProjectile::TeleportInstigatorAfterProjectileHit, 0.2f);
+
+	//GetWorldTimerManager().SetTimer(TimerHandle_Projectile, 0.2f);
+
+	//GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ASCharacter::PrimaryAttack_TimeElapsed, 0.2f);
+
 }
+
+void ASDashProjectile::ProjectileTeleport()
+{
+	UE_LOG(LogTemp, Log, TEXT("ProjectileTeleport in Dash Projectile"));
+	GetWorldTimerManager().SetTimer(TimerHandle_Projectile, this, &ASDashProjectile::ProjectileTeleportAfterTimeElapsed, 1.0f);
+}
+
+void ASDashProjectile::ProjectileTeleportAfterTimeElapsed()
+{
+	MovementComp->StopMovementImmediately();
+	InstigatorCharacter = GetInstigator();
+	RotationProjectile = SphereComp->GetComponentRotation();
+	LocationProjectile = SphereComp->GetComponentLocation();
+	EffectComp->DestroyComponent();
+	UGameplayStatics::SpawnEmitterAtLocation(this, ExplosionParticle, LocationProjectile, RotationProjectile);
+	GetWorldTimerManager().SetTimer(TimerHandle_Projectile, this, &ASDashProjectile::TeleportInstigatorAfterProjectileHit, 0.2f);
+
+}
+
+
 
 
 // Called when the game starts or when spawned
@@ -39,7 +75,7 @@ void ASDashProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 	SphereComp->OnComponentHit.AddDynamic(this, &ASDashProjectile::OnActorHit);
-	
+	ProjectileTeleport();
 }
 
 // Called every frame
