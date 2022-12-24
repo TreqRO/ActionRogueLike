@@ -37,7 +37,7 @@ ASCharacter::ASCharacter()
 
 	InteractionComp = CreateDefaultSubobject<USInteractionComponent>("interactionComp");
 
-	
+	AttackAnimDelay = 0.2f;
 }
 
 // Called when the game starts or when spawned
@@ -84,6 +84,98 @@ void ASCharacter::MoveRight(float Value)
 	AddMovementInput(RightVector, Value);
 }
 
+void ASCharacter::PrimaryInteract()
+{
+	// Opens up the chest if its in the line of sight
+	InteractionComp->PrimaryInteract();
+}
+
+// Called every frame
+void ASCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+}
+
+// Called to bind functionality to input
+void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	PlayerInputComponent->BindAxis("MoveForward", this, &ASCharacter::MoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &ASCharacter::MoveRight);
+
+	// Adds Yaw as input (horizontal rotation)
+	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
+	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
+
+	PlayerInputComponent->BindAction("Dash", IE_Pressed, this, &ASCharacter::Dash);
+
+	//Making sure that we as the player can spawn the SMagicProjectile (By prssing a key hence we bind it to an action)
+	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &ASCharacter::PrimaryAttack);
+
+	//Making sure that we as the player can spawn the SBlackholeProjectile (By prssing a key hence we bind it to an action)
+	PlayerInputComponent->BindAction("BlackholeAttack", IE_Pressed, this, &ASCharacter::BlackholeAttack);
+
+	PlayerInputComponent->BindAction("Dash", IE_Pressed, this, &ASCharacter::Dash);
+
+	//Makes the character jump
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASCharacter::Jump);
+
+
+	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &ASCharacter::PrimaryInteract);
+
+
+}
+
+void ASCharacter::SpawnProjectile(TSubclassOf<AActor> ClassToSpawn)
+{
+	if (ensure(ClassToSpawn))
+	{
+		FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
+
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		SpawnParams.Instigator = this;
+
+		FCollisionShape Shape;
+		Shape.SetSphere(20.0f);
+
+		//Ignore player
+		FCollisionQueryParams Params;
+		Params.AddIgnoredActor(this);
+
+		FCollisionObjectQueryParams ObjParams;
+		ObjParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+		ObjParams.AddObjectTypesToQuery(ECC_WorldStatic);
+		ObjParams.AddObjectTypesToQuery(ECC_Pawn);
+		// Added by me
+		ObjParams.AddObjectTypesToQuery(ECC_PhysicsBody);
+
+		FVector TraceStart = CameraComp->GetComponentLocation();
+
+		//endpoint far into the look-at distance (not too far, still adjust somewhat towards crosshair on a miss)
+		FVector TraceEnd = CameraComp->GetComponentLocation() + (GetControlRotation().Vector() * 5000);
+
+		FHitResult Hit;
+		// returns true if we got a blocking hit
+		if (GetWorld()->SweepSingleByObjectType(Hit, TraceStart, TraceEnd, FQuat::Identity, ObjParams, Shape, Params))
+		{
+			// Overwrite trace end with impact point in world
+			TraceEnd = Hit.ImpactPoint;
+		}
+
+		// Find new direction/rotation from Hand pointing to impact point in world.
+		FRotator ProjRotation = FRotationMatrix::MakeFromX(TraceEnd - HandLocation).Rotator();
+
+		FTransform SpawnTM = FTransform(ProjRotation, HandLocation);
+		GetWorld()->SpawnActor<AActor>(ClassToSpawn, SpawnTM, SpawnParams);
+
+
+	}
+}
+
+
 void ASCharacter::PrimaryAttack()
 {
 	// Plays the animation we pass in the Editor blue print!
@@ -98,10 +190,46 @@ void ASCharacter::PrimaryAttack()
 	
 
 	// Add a timer so the Projectile will spawn when the hand is fully extended during the animation
-	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ASCharacter::PrimaryAttack_TimeElapsed, 0.2f);
-
+	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ASCharacter::PrimaryAttack_TimeElapsed, AttackAnimDelay);
 
 }
+
+void ASCharacter::PrimaryAttack_TimeElapsed()
+{
+	SpawnProjectile(ProjectileClass);
+}
+
+void ASCharacter::BlackholeAttack()
+{
+	// Plays the animation we pass in the Editor blue print!
+	PlayAnimMontage(AttackAnim);
+
+	// Add a timer so the Projectile will spawn when the hand is fully extended during the animation
+	GetWorldTimerManager().SetTimer(TimerHandle_BlackHoleAttack, this, &ASCharacter::BlackholeAttack_TimeElapsed, AttackAnimDelay);
+}
+
+void ASCharacter::BlackholeAttack_TimeElapsed()
+{
+	SpawnProjectile(ProjectileBlackHoleClass);
+}
+
+void ASCharacter::Dash()
+{
+	// Plays the animation we pass in the Editor blue print!
+	PlayAnimMontage(AttackAnim);
+
+	// Add a timer so the Projectile will spawn when the hand is fully extended during the animation
+	GetWorldTimerManager().SetTimer(TimerHandle_Dash, this, &ASCharacter::Dash_TimeElapsed, AttackAnimDelay);
+}
+
+void ASCharacter::Dash_TimeElapsed()
+{
+	SpawnProjectile(ProjectileDashClass);
+}
+
+
+/*
+ MY WAY
 
 // Trigger attack after delay
 void ASCharacter::PrimaryAttack_TimeElapsed()
@@ -187,14 +315,7 @@ void ASCharacter::PrimaryAttack_TimeElapsed()
 
 }
 
-void ASCharacter::BlackholeAttack()
-{
-	// Plays the animation we pass in the Editor blue print!
-	PlayAnimMontage(AttackAnim);
 
-	// Add a timer so the Projectile will spawn when the hand is fully extended during the animation
-	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ASCharacter::BlackholeAttack_TimeElapsed, 0.2f);
-}
 
 void ASCharacter::BlackholeAttack_TimeElapsed()
 {
@@ -256,15 +377,6 @@ void ASCharacter::BlackholeAttack_TimeElapsed()
 		//Spawn the BlackHole Attack Projectile
 		GetWorld()->SpawnActor<AActor>(ProjectileBlackHoleClass, SpawnTM, SpawnParams);
 	}
-}
-
-void ASCharacter::Dash()
-{
-	// Plays the animation we pass in the Editor blue print!
-	PlayAnimMontage(AttackAnim);
-
-	// Add a timer so the Projectile will spawn when the hand is fully extended during the animation
-	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ASCharacter::Dash_TimeElapsed, 0.2f);
 }
 
 void ASCharacter::Dash_TimeElapsed()
@@ -330,50 +442,7 @@ void ASCharacter::Dash_TimeElapsed()
 	}
 }
 
-
-void ASCharacter::PrimaryInteract()
-{
-	// Opens up the chest if its in the line of sight
-	InteractionComp->PrimaryInteract();
-}
-
-// Called every frame
-void ASCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
-// Called to bind functionality to input
-void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	PlayerInputComponent->BindAxis("MoveForward", this, &ASCharacter::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &ASCharacter::MoveRight);
-
-	// Adds Yaw as input (horizontal rotation)
-	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
-
-	PlayerInputComponent->BindAction("Dash", IE_Pressed, this, &ASCharacter::Dash);
-
-	//Making sure that we as the player can spawn the SMagicProjectile (By prssing a key hence we bind it to an action)
-	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &ASCharacter::PrimaryAttack);
-
-	//Making sure that we as the player can spawn the SBlackholeProjectile (By prssing a key hence we bind it to an action)
-	PlayerInputComponent->BindAction("BlackholeAttack", IE_Pressed, this, &ASCharacter::BlackholeAttack);
-
-	PlayerInputComponent->BindAction("Dash", IE_Pressed, this, &ASCharacter::Dash);
-
-	//Makes the character jump
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASCharacter::Jump);
-
-	
-	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &ASCharacter::PrimaryInteract);
-
-
-}
+*/
 
 
 

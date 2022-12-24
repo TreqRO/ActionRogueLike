@@ -35,7 +35,12 @@ protected:
 	// The Attack Animation WHICH IS PASSED IN THE EDITOR!
 	UAnimMontage* AttackAnim;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Attack")
+	float AttackAnimDelay;
+
 	FTimerHandle TimerHandle_PrimaryAttack;
+	FTimerHandle TimerHandle_Dash;
+	FTimerHandle TimerHandle_BlackHoleAttack;
 
 
 public:
@@ -82,6 +87,8 @@ protected:
 
 	void Dash_TimeElapsed();
 
+	void SpawnProjectile(TSubclassOf<AActor> ClassToSpawn);
+
 
 public:	
 	// Called every frame
@@ -89,5 +96,5 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+	
 };

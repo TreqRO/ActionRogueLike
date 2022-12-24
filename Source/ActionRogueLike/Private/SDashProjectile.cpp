@@ -30,6 +30,7 @@ void ASDashProjectile::Explode_Implementation()
 {
 	// Clear timer if the Explode was already called through another source like OnActorHit
 	GetWorldTimerManager().ClearTimer(TimerHandle_DelayedDetonate);
+
 	UGameplayStatics::SpawnEmitterAtLocation(this, ImpactVFX, GetActorLocation(), GetActorRotation());
 
 	EffectComp->DeactivateSystem();
@@ -37,8 +38,13 @@ void ASDashProjectile::Explode_Implementation()
 	MovementComp->StopMovementImmediately();
 	SetActorEnableCollision(false);
 
+	// Set as local variable since we don't have ever an intention of canceling that event.
 	FTimerHandle TimeHandle_DelayedTeleport;
 	GetWorldTimerManager().SetTimer(TimeHandle_DelayedTeleport, this, &ASDashProjectile::TeleportInstigator, TeleportDelay);
+
+	//Skip base implementation as it will destroy actor (we need to stay alive a bit longer to finish the 2nd timer aka the Teleport delay)
+	//Super::Explode_Implementation();
+
 }
 
 
