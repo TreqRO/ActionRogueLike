@@ -7,6 +7,7 @@
 #include "SCharacter.generated.h"
 
 
+class USAttributeComponent;
 class UCameraComponent;
 class USpringArmComponent;
 class USInteractionComponent;
@@ -58,6 +59,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	USInteractionComponent* InteractionComp;
+
+	// Put in the category "Components" all your components (standard convention)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USAttributeComponent* AttributeComp;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

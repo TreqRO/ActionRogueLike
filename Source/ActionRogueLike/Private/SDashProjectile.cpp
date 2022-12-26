@@ -28,7 +28,7 @@ void ASDashProjectile::BeginPlay()
 
 void ASDashProjectile::Explode_Implementation()
 {
-	// Clear timer if the Explode was already called through another source like OnActorHit
+	// Clear timer if the Explode was already called through another source like OnActorHit. In that case, he doesn't wait the Detonate Delay anymore (from above)
 	GetWorldTimerManager().ClearTimer(TimerHandle_DelayedDetonate);
 
 	UGameplayStatics::SpawnEmitterAtLocation(this, ImpactVFX, GetActorLocation(), GetActorRotation());
