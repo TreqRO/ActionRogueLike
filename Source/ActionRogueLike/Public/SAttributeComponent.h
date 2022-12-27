@@ -38,6 +38,10 @@ protected:
 	//HealthMax, Stamina, Strength
 
 public:	
+	//put it in public because we want to access it from outside
+	// By making it constant it is basically a get function. It's has read only access to this information. (rather thant full read write access basically)
+	UFUNCTION(BlueprintCallable)
+	bool IsAlive() const;
 
 	// Allows us in BP to bind to this event
 	UPROPERTY(BlueprintAssignable)

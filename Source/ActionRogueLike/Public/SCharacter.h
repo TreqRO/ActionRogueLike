@@ -92,7 +92,15 @@ protected:
 
 	void Dash_TimeElapsed();
 
+	// Re-use spawn logic between attacks
 	void SpawnProjectile(TSubclassOf<AActor> ClassToSpawn);
+
+	// Don't forget to bind the Function!
+	UFUNCTION()
+	void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
+
+	// Best way to bind your events!
+	virtual void PostInitializeComponents() override;
 
 
 public:	

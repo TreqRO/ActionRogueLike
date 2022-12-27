@@ -19,7 +19,10 @@ bool USAttributeComponent::ApplyHealthChange(float Delta)
 	//Since we don't have any success or fail right now, we just return true.
 	return true;
 }
-
-
+// By making it constant it is basically a get function. It's has read only access to this information. (rather thant full read write access basically)
+bool USAttributeComponent::IsAlive() const
+{
+	return Health > 0.0f;
+}
 
 

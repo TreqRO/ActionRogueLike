@@ -43,6 +43,15 @@ ASCharacter::ASCharacter()
 	AttackAnimDelay = 0.2f;
 }
 
+void ASCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	// Bind the OnHealthChange function!
+	AttributeComp->OnHealthChanged.AddDynamic(this, &ASCharacter::OnHealthChanged);
+
+}
+
 // Called when the game starts or when spawned
 void ASCharacter::BeginPlay()
 {
@@ -179,6 +188,8 @@ void ASCharacter::SpawnProjectile(TSubclassOf<AActor> ClassToSpawn)
 }
 
 
+
+
 void ASCharacter::PrimaryAttack()
 {
 	// Plays the animation we pass in the Editor blue print!
@@ -228,6 +239,16 @@ void ASCharacter::Dash()
 void ASCharacter::Dash_TimeElapsed()
 {
 	SpawnProjectile(ProjectileDashClass);
+}
+
+void ASCharacter::OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth,
+	float Delta)
+{	// If the health of the character is below 0 and the delta was a "Damage Hit" then it means that he is dead and we disable the Player Controls.  
+	if (NewHealth <= 0.0f && Delta < 0.0f)
+	{
+		APlayerController* PC = Cast<APlayerController>(GetController());
+		DisableInput(PC);
+	}
 }
 
 
