@@ -5,6 +5,7 @@
 #include "SAttributeComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 
 
@@ -34,6 +35,9 @@ void ASMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent,
 		// Can still be null if we hit a wall or we hit some kind of cube, that doesn't have the attribute component
 		if (AttributeComp)
 		{
+			//Impact Sound
+			UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), GetActorRotation());
+
 			// Now if we hit whoever has the attribute (it doesn't have to be the character, it can be also the explosive barrel), the health
 			// will be reduce by 20. 
 			AttributeComp->ApplyHealthChange(-DamageAmount);
