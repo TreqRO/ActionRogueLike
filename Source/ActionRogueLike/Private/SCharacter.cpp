@@ -8,6 +8,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -41,6 +42,9 @@ ASCharacter::ASCharacter()
 	AttributeComp = CreateDefaultSubobject<USAttributeComponent>("AttributeComp");
 
 	AttackAnimDelay = 0.2f;
+
+	TimeToHitParamName = "TimeToHit";
+	HandSocketName = "Muzzle_01";
 }
 
 void ASCharacter::PostInitializeComponents()
@@ -144,7 +148,7 @@ void ASCharacter::SpawnProjectile(TSubclassOf<AActor> ClassToSpawn)
 {
 	if (ensure(ClassToSpawn))
 	{
-		FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
+		FVector HandLocation = GetMesh()->GetSocketLocation(HandSocketName);
 
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -187,13 +191,19 @@ void ASCharacter::SpawnProjectile(TSubclassOf<AActor> ClassToSpawn)
 	}
 }
 
+void ASCharacter::StartAttackEffects()
+{
+	PlayAnimMontage(AttackAnim);
+	UGameplayStatics::SpawnEmitterAttached(CastingEffect, GetMesh(), HandSocketName, FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget);
+}
 
 
 
 void ASCharacter::PrimaryAttack()
 {
 	// Plays the animation we pass in the Editor blue print!
-	PlayAnimMontage(AttackAnim);
+	//PlayAnimMontage(AttackAnim);
+	StartAttackEffects();
 
 	//The time handle is just another struct which hold a handle to this timer. For example if we want to stop this timer before it started, we just
 	// get the timer and we use that to clear it but we need to know which timer are we talking about.
@@ -216,7 +226,8 @@ void ASCharacter::PrimaryAttack_TimeElapsed()
 void ASCharacter::BlackholeAttack()
 {
 	// Plays the animation we pass in the Editor blue print!
-	PlayAnimMontage(AttackAnim);
+	//PlayAnimMontage(AttackAnim);
+	StartAttackEffects();
 
 	// Add a timer so the Projectile will spawn when the hand is fully extended during the animation
 	GetWorldTimerManager().SetTimer(TimerHandle_BlackHoleAttack, this, &ASCharacter::BlackholeAttack_TimeElapsed, AttackAnimDelay);
@@ -230,7 +241,8 @@ void ASCharacter::BlackholeAttack_TimeElapsed()
 void ASCharacter::Dash()
 {
 	// Plays the animation we pass in the Editor blue print!
-	PlayAnimMontage(AttackAnim);
+	//PlayAnimMontage(AttackAnim);
+	StartAttackEffects();
 
 	// Add a timer so the Projectile will spawn when the hand is fully extended during the animation
 	GetWorldTimerManager().SetTimer(TimerHandle_Dash, this, &ASCharacter::Dash_TimeElapsed, AttackAnimDelay);
@@ -247,7 +259,7 @@ void ASCharacter::OnHealthChanged(AActor* InstigatorActor, USAttributeComponent*
 	{
 		// The name set on BP
 		// We pass the game time which is synchronous with that time node in our material 
-		GetMesh()->SetScalarParameterValueOnMaterials("TimeToHit", GetWorld()->TimeSeconds);
+		GetMesh()->SetScalarParameterValueOnMaterials(TimeToHitParamName, GetWorld()->TimeSeconds);
 	}
 
 	// If the health of the character is below 0 and the delta was a "Damage Hit" then it means that he is dead and we disable the Player Controls.  

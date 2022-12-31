@@ -12,6 +12,7 @@ class UCameraComponent;
 class USpringArmComponent;
 class USInteractionComponent;
 class UAnimMontage;
+class UParticleSystem;
 
 UCLASS()
 class ACTIONROGUELIKE_API ASCharacter : public ACharacter
@@ -19,6 +20,14 @@ class ACTIONROGUELIKE_API ASCharacter : public ACharacter
 	GENERATED_BODY()
 
 protected:
+
+	// VisibleAnywhere = read-only, still useful to view in-editor and enforce a convention.
+	UPROPERTY(VisibleAnywhere, Category="Effects")
+	FName TimeToHitParamName;
+
+	UPROPERTY(VisibleAnywhere, Category="Effects")
+	FName HandSocketName;
+
 	// Allows us to assign a class (it could be an actor, pawn, character or in this case our Magic Projectile because Magic Projectile
 	// derives from actor.
 	// Make sure to add an UPROPERTY to make sure that this is visible from the editor and that we can actually assign a variable.
@@ -35,6 +44,10 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	// The Attack Animation WHICH IS PASSED IN THE EDITOR!
 	UAnimMontage* AttackAnim;
+
+	// Particle System played during attack animation
+	UPROPERTY(EditAnywhere, Category="Attack")
+	UParticleSystem* CastingEffect;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Attack")
 	float AttackAnimDelay;
@@ -91,6 +104,8 @@ protected:
 	void Dash();
 
 	void Dash_TimeElapsed();
+
+	void StartAttackEffects();
 
 	// Re-use spawn logic between attacks
 	void SpawnProjectile(TSubclassOf<AActor> ClassToSpawn);

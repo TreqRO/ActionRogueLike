@@ -35,6 +35,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
 	float Health;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
+	float HealthMax;
+
 	//HealthMax, Stamina, Strength
 
 public:	
@@ -42,6 +45,12 @@ public:
 	// By making it constant it is basically a get function. It's has read only access to this information. (rather thant full read write access basically)
 	UFUNCTION(BlueprintCallable)
 	bool IsAlive() const;
+
+	UFUNCTION(BlueprintCallable)
+	bool IsFullHealth() const;
+
+	UFUNCTION(BlueprintCallable)
+	float GetHealthMax() const;
 
 	// Allows us in BP to bind to this event
 	UPROPERTY(BlueprintAssignable)
