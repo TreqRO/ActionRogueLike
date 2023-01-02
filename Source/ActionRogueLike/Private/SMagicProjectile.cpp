@@ -16,6 +16,8 @@ ASMagicProjectile::ASMagicProjectile()
 	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &ASMagicProjectile::OnActorOverlap);
 
 	DamageAmount = 20.0f;
+
+	//CameraShakeBase = CreateDefaultSubobject<UCameraShakeBase>(TEXT("CameraShakeBase"));
 }
 
 void ASMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -35,6 +37,12 @@ void ASMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent,
 		// Can still be null if we hit a wall or we hit some kind of cube, that doesn't have the attribute component
 		if (AttributeComp)
 		{
+
+
+			// Add the camera shake
+			//UGameplayStatics::PlayWorldCameraShake(this, ImpactShake, SweepResult.ImpactPoint, 1000.0f, 1000.0f);
+			UGameplayStatics::PlayWorldCameraShake(this, ImpactShake, GetActorLocation(), ImpactShakeInnerRadius, ImpactShakeOuterRadius);
+
 			//Impact Sound
 			UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), GetActorRotation());
 

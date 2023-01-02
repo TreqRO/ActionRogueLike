@@ -46,6 +46,19 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UAudioComponent* AudioComp;
 
+	// You need TSubClassOf around the UCameraShakebase. This is because we want to assign different
+	// classes derived from the shared parent class (CameraShakeBase) rather than assign an asset type
+	// such as ParticleSystem or SoundCue which wouldn't use TSubClassOf but a *(pointer) instead.
+	UPROPERTY(EditDefaultsOnly, Category = "Effects|Shake")
+	TSubclassOf<UCameraShakeBase> ImpactShake;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Effects|Shake")
+	float ImpactShakeInnerRadius;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Effects|Shake")
+	float ImpactShakeOuterRadius;
+
+
 	//'virtual' so we can override this in child-classes 
 	// Must be marked with ufunction in order to 'bind' the event
 	UFUNCTION()

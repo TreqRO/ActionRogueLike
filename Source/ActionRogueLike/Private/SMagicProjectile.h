@@ -12,6 +12,7 @@
 //class UProjectileMovementComponent;
 //class UParticleSystemComponent;
 //class UAudioComponent;
+class UCameraShakeBase;
 
 UCLASS()
 class ASMagicProjectile : public ASSharedProjectileClass
@@ -36,6 +37,8 @@ protected:
 	//// Particle system component just so that we have something to show in the world.
 	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	//UParticleSystemComponent* EffectComp;
+
+
 
 	
 

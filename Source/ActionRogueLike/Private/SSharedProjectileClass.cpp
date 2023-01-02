@@ -42,11 +42,17 @@ ASSharedProjectileClass::ASSharedProjectileClass()
 
 	AudioComp = CreateDefaultSubobject<UAudioComponent>("AudioComp");
 	AudioComp->SetupAttachment(RootComponent);
+
+	ImpactShakeInnerRadius = 0.0f;
+	ImpactShakeOuterRadius = 1500.0f;
+
 }
 
 void ASSharedProjectileClass::OnActorHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+
 	Explode();
+
 }
 
 // _Implementation from it being marked as BlueprintNativeEvent
@@ -56,6 +62,9 @@ void ASSharedProjectileClass::Explode_Implementation()
 	// Adding ensure to see if we encounter this situation at all
 	if (ensure(IsValid(this)))
 	{
+		// Add the camera shake
+		UGameplayStatics::PlayWorldCameraShake(this, ImpactShake, GetActorLocation(), ImpactShakeInnerRadius, ImpactShakeOuterRadius);
+
 		UGameplayStatics::SpawnEmitterAtLocation(this, ImpactVFX, GetActorLocation(), GetActorRotation());
 
 		//Impact Sound
