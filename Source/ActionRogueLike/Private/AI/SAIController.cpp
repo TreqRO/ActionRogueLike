@@ -11,8 +11,14 @@ void ASAIController::BeginPlay()
 {
 	// Call super in order not lose any of the default logic.
 	Super::BeginPlay();
-	RunBehaviorTree(BehaviorTree);
 
+	if (ensureMsgf(BehaviorTree, TEXT("Behavior Tree is nullptr! Please assign BehaviorTree in your AI Controller")))
+	{
+		RunBehaviorTree(BehaviorTree);
+	}
+
+
+	/*
 	// Placeholder Code
 	// Going to grab Player Character and I'm just going to add his location into here. (usually use the PawnSensing)
 	// WorldContextObject - pass any type of object that lives in the world. This will be good enough because it lives in the world.
@@ -30,5 +36,6 @@ void ASAIController::BeginPlay()
 		// We are passing in our Player Character
 		GetBlackboardComponent()->SetValueAsObject("TargetActor", MyPawn);
 	}
+	*/
 
 }
