@@ -26,6 +26,7 @@ protected:
 public:
 	// Sets default values for this character's properties
 	ASAICharacter();
+	
 
 protected:
 
@@ -45,4 +46,6 @@ protected:
 	void OnPawnSeen(APawn* Pawn);
 
 	virtual void PostInitializeComponents() override;
+
+	void SetInBBInitialHealth();
 };

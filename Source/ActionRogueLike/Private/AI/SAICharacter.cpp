@@ -15,15 +15,46 @@ ASAICharacter::ASAICharacter()
 
 	AttributeComp = CreateDefaultSubobject<USAttributeComponent>("AttributeComp");
 
+	SetInBBInitialHealth();
+
+}
+
+void ASAICharacter::SetInBBInitialHealth()
+{
+	AAIController* AIC = Cast<AAIController>(GetController());
+
+	if (AIC)
+	{
+		UBlackboardComponent* BBComp = AIC->GetBlackboardComponent();
+
+		if(BBComp)
+		{
+			float CurrentHealth = AttributeComp->GetCurrentHealth();
+			BBComp->SetValueAsFloat("AICurrentHealth", CurrentHealth);
+
+		}
+
+
+		// The name set on BP
+		// We pass the game time which is synchronous with that time node in our material 
+		//GetMesh()->SetScalarParameterValueOnMaterials(TimeToHitParamName, GetWorld()->TimeSeconds);
+	}
 }
 
 void ASAICharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
+
+
+
 	PawnSensingComp->OnSeePawn.AddDynamic(this, &ASAICharacter::OnPawnSeen);
 
 	// Bind the OnHealthChange function!
 	AttributeComp->OnHealthChanged.AddDynamic(this, &ASAICharacter::OnHealthChanged);
+
+	
+
+
 }
 
 void ASAICharacter::OnPawnSeen(APawn* Pawn)

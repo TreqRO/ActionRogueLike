@@ -51,6 +51,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	float GetHealthMax() const;
+	UFUNCTION(BlueprintCallable)
+	float GetCurrentHealth() const;
 
 	// Allows us in BP to bind to this event
 	UPROPERTY(BlueprintAssignable)
