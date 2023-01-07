@@ -255,7 +255,9 @@ void ASCharacter::Dash_TimeElapsed()
 
 void ASCharacter::OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth,
 	float Delta)
-{	if (Delta < 0.0f)
+{
+	
+	if (Delta < 0.0f)
 	{
 		// The name set on BP
 		// We pass the game time which is synchronous with that time node in our material 
