@@ -15,9 +15,11 @@ ASAICharacter::ASAICharacter()
 
 	AttributeComp = CreateDefaultSubobject<USAttributeComponent>("AttributeComp");
 
-	SetInBBInitialHealth();
+	
 
 }
+
+
 
 void ASAICharacter::SetInBBInitialHealth()
 {
@@ -40,6 +42,13 @@ void ASAICharacter::SetInBBInitialHealth()
 		//GetMesh()->SetScalarParameterValueOnMaterials(TimeToHitParamName, GetWorld()->TimeSeconds);
 	}
 }
+
+void ASAICharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	SetInBBInitialHealth();
+}
+
 
 void ASAICharacter::PostInitializeComponents()
 {

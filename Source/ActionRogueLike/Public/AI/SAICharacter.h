@@ -45,7 +45,10 @@ protected:
 	UFUNCTION()
 	void OnPawnSeen(APawn* Pawn);
 
+	void SetInBBInitialHealth();
+
 	virtual void PostInitializeComponents() override;
 
-	void SetInBBInitialHealth();
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 };
