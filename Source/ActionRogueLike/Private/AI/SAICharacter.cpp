@@ -20,7 +20,7 @@ ASAICharacter::ASAICharacter()
 }
 
 
-
+// Not Used anymore
 void ASAICharacter::SetInBBInitialHealth()
 {
 	AAIController* AIC = Cast<AAIController>(GetController());
@@ -46,7 +46,7 @@ void ASAICharacter::SetInBBInitialHealth()
 void ASAICharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	SetInBBInitialHealth();
+	//SetInBBInitialHealth();
 }
 
 
@@ -85,18 +85,13 @@ void ASAICharacter::OnHealthChanged(AActor* InstigatorActor, USAttributeComponen
 {
 	if (Delta < 0.0f)
 	{
-		AAIController* AIC = Cast<AAIController>(GetController());
+		//AAIController* AIC = Cast<AAIController>(GetController());
 
-		if(AIC)
-		{
-		UBlackboardComponent* BBComp = AIC->GetBlackboardComponent();
-		BBComp->SetValueAsFloat("AICurrentHealth", NewHealth);
-		
-
-		// The name set on BP
-		// We pass the game time which is synchronous with that time node in our material 
-		//GetMesh()->SetScalarParameterValueOnMaterials(TimeToHitParamName, GetWorld()->TimeSeconds);
-		}
+		//if(AIC)
+		//{
+		//UBlackboardComponent* BBComp = AIC->GetBlackboardComponent();
+		//BBComp->SetValueAsFloat("AICurrentHealth", NewHealth);
+		//}
 	}
 //
 //	// If the health of the character is below 0 and the delta was a "Damage Hit" then it means that he is dead and we disable the Player Controls.  

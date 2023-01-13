@@ -30,9 +30,15 @@ float USAttributeComponent::GetCurrentHealth() const
 
 
 
-bool USAttributeComponent::ApplyHealthChange(float Delta)
+bool USAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delta)
 {
 	// Here we make the actual change to our Health variable rather than giving direct access to it. 
+
+	if(!GetOwner()->CanBeDamaged())
+	{
+		return false;
+	}
+
 	//Health += Delta;
 	float HealthOld = Health;
 
@@ -42,7 +48,7 @@ bool USAttributeComponent::ApplyHealthChange(float Delta)
 	float ActualDelta = Health - HealthOld;
 		
 	// Trigger the event whenever our health has been changed
-	OnHealthChanged.Broadcast(nullptr, this, Health, ActualDelta);
+	OnHealthChanged.Broadcast(InstigatorActor, this, Health, ActualDelta);
 	//Since we don't have any success or fail right now, we just return true.
 	return ActualDelta!= 0;
 }
@@ -51,5 +57,28 @@ bool USAttributeComponent::IsAlive() const
 {
 	return Health > 0.0f;
 }
+
+USAttributeComponent* USAttributeComponent::GetAttributes(AActor* FromActor)
+{
+	if(FromActor)
+	{
+		return Cast<USAttributeComponent>(FromActor->GetComponentByClass(USAttributeComponent::StaticClass()));
+
+	}
+	return nullptr;
+}
+
+bool USAttributeComponent::IsActorAlive(AActor* Actor)
+{
+	USAttributeComponent* AttributeComp = GetAttributes(Actor);
+	if(AttributeComp)
+	{
+		return AttributeComp->IsAlive();
+	}
+
+	return false;
+}
+
+
 
 

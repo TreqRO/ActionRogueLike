@@ -5,6 +5,11 @@
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
+USBTService_CheckAttackRange::USBTService_CheckAttackRange()
+{
+	MaxAttackRange = 2000.0f;
+}
+
 void USBTService_CheckAttackRange::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory,
                                             float DeltaSeconds)
 {
@@ -40,7 +45,7 @@ void USBTService_CheckAttackRange::TickNode(UBehaviorTreeComponent& OwnerComp, u
 					float DistanceTo = FVector::Distance(TargetActor->GetActorLocation(), AIPawn->GetActorLocation());
 
 					// if it's less than 2000 then we are within range. 
-					bool bWithinRange = DistanceTo < 2000.0f;
+					bool bWithinRange = DistanceTo < MaxAttackRange;
 					bool bHasLOS = false;
 
 					// A bit more efficient, only check if in sight if you are range otherwise don't both

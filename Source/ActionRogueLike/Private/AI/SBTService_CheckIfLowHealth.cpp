@@ -2,7 +2,15 @@
 
 
 #include "AI/SBTService_CheckIfLowHealth.h"
+
+#include "AIController.h"
+#include "SAttributeComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
+
+USBTService_CheckIfLowHealth::USBTService_CheckIfLowHealth()
+{
+    LowHealthFraction = 0.3f;
+}
 
 void USBTService_CheckIfLowHealth::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory,
                                             float DeltaSeconds)
@@ -10,17 +18,34 @@ void USBTService_CheckIfLowHealth::TickNode(UBehaviorTreeComponent& OwnerComp, u
     //Make sure to call super since we don't want to override any base logic.
     Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
-    // GOAL: Check periodically if the AI Health is low (below 40%)
+	// GOAL: Check periodically if the AI Health is low (below 30%)
 
-    //Pass by reference(&) use dot(.) by pointer is ->
-    UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
 
-    if ensure((BlackboardComp))
+    APawn* AIPawn = OwnerComp.GetAIOwner()->GetPawn();
+    if(ensure(AIPawn))
     {
-        // Get the current health from the blackboard
-        float CurrentHealth = BlackboardComp->GetValueAsFloat("AICurrentHealth");
+        USAttributeComponent* AttributeComp = USAttributeComponent::GetAttributes(AIPawn);
 
-        bool bIsLowHealth = CurrentHealth <= 40.0f;
-    	BlackboardComp->SetValueAsBool(AILowHealthKey.SelectedKeyName, bIsLowHealth);
+        if(ensure(AttributeComp))
+        {
+            bool bLowHealth = (AttributeComp->GetCurrentHealth() / AttributeComp->GetHealthMax()) < LowHealthFraction;
+
+            UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
+            BlackboardComp->SetValueAsBool(AILowHealthKey.SelectedKeyName, bLowHealth);
+
+        }
     }
+
+    // MY WAY
+    //Pass by reference(&) use dot(.) by pointer is ->
+    //UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
+
+    //if ensure((BlackboardComp))
+    //{
+    //    // Get the current health from the blackboard
+    //    float CurrentHealth = BlackboardComp->GetValueAsFloat("AICurrentHealth");
+
+    //    bool bIsLowHealth = CurrentHealth <= 40.0f;
+    //	BlackboardComp->SetValueAsBool(AILowHealthKey.SelectedKeyName, bIsLowHealth);
+    //}
 }

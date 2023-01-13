@@ -19,4 +19,6 @@ protected:
 	// With EditDefaultsOnly we would not see it.
 	UPROPERTY(EditAnywhere, Category = "AI")
 	TSubclassOf<AActor> ProjectileClass;
+
+	/* Max Random Bullet Spread (in Degrees) in positive and negative angle (shared between Yaw and Pitch) */
 };
