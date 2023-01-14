@@ -29,6 +29,8 @@ public:
 	
 
 protected:
+	UPROPERTY(VisibleAnywhere, Category = "Effects");
+	FName TimeToHitParamName;
 
 	// Sight AI
 	UPROPERTY(VisibleAnywhere, Category = "Components")

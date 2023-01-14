@@ -18,6 +18,8 @@ ASAICharacter::ASAICharacter()
 
 	// Put the AI Behavior tree on a minion that is either placed or spawned in the world.
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+	TimeToHitParamName = "TimeToHit";
 }
 
 
@@ -99,6 +101,9 @@ void ASAICharacter::OnHealthChanged(AActor* InstigatorActor, USAttributeComponen
 		{
 			SetTargetActor(InstigatorActor);
 		}
+		// If he is damaged, then show the hit flash of the AI!
+		// Also make sure to make a small update to the minion ranged material 
+		GetMesh()->SetScalarParameterValueOnMaterials(TimeToHitParamName, GetWorld()->TimeSeconds);
 
 		// When we just died
 		if(NewHealth <= 0.0f)

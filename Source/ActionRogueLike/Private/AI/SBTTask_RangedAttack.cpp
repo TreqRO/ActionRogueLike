@@ -3,8 +3,17 @@
 
 #include "AI/SBTTask_RangedAttack.h"
 #include "AIController.h"
+#include "SAttributeComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
+
+
+
+USBTTask_RangedAttack::USBTTask_RangedAttack()
+{
+	// This will be in degrees (pith and yawn work in degrees)
+	MaxBulletSpread = 2.0f;
+}
 
 EBTNodeResult::Type USBTTask_RangedAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
@@ -33,13 +42,30 @@ EBTNodeResult::Type USBTTask_RangedAttack::ExecuteTask(UBehaviorTreeComponent& O
 			return EBTNodeResult::Failed;
 		}
 
+		// If the Target Actor is not alive, then we return failed.
+		// This will not only end the task before we even spawn the actor but also basically fail this entire tree on the BT (It will exist the loop).
+		// It will still come back in so we must make sure that we clear the set target actor somewhere else.
+		if (!USAttributeComponent::IsActorAlive(TargetActor))
+		{
+			return EBTNodeResult::Failed;
+		}
+
 		// Gives the direction vector pointing toward the target Actor (target - origin)
 		FVector Direction = TargetActor->GetActorLocation() - MuzzleLocation;
 		FRotator MuzzleRotation = Direction.Rotation();
 
+		// We want to make sure that we add a little bit of offset (a little bit of random weapon spread) because the guys are currently just laser targeting us and they are way too good
+		// at shooting (random number are huge part of making games).
+
+		//Adjust the muzzle rotation in pitch (up and down) and yawn (left and right)
+		// I don't want him to ever shoot downward (hence Pith min offset 0)
+		MuzzleRotation.Pitch += FMath::RandRange(0.0f, MaxBulletSpread);
+		MuzzleRotation.Yaw += FMath::RandRange(-MaxBulletSpread, MaxBulletSpread);
+
 		//Spawn the projectile
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		// If we don't specify the instigator we can actually overlap with ourselves! (hence hitting himself)
 		SpawnParams.Instigator = MyPawn;
 
 
@@ -53,3 +79,4 @@ EBTNodeResult::Type USBTTask_RangedAttack::ExecuteTask(UBehaviorTreeComponent& O
 	return EBTNodeResult::Failed;
 	//return Super::ExecuteTask(OwnerComp, NodeMemory);
 }
+
