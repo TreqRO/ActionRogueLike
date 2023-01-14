@@ -30,7 +30,47 @@ void ASGameModeBase::StartPlay()
 
 void ASGameModeBase::SpawnBotTimerElapsed()
 {
+	// Every time we hit this query we can find what is the number of alive bots at this point in time
+	int32 NrOfAliveBots = 0;
+	// Better version of "Get Actor by class" by letting us specify which class we want to grab.
+	// Let us get a pointer to all of the instances of our characters in the world
+	// This is a class from unreal that lets us grab any instance of a particular class (ASAICharacter) in a current level.
+	// We could've us for e.g AActor (but it would return way too much).
+	for (TActorIterator<ASAICharacter> It(GetWorld()); It; ++It)
+	{
+		ASAICharacter* Bot = *It;
+
+		USAttributeComponent* AttributeComp = Cast<USAttributeComponent>(Bot->GetComponentByClass(USAttributeComponent::StaticClass()));
+		if (ensure(AttributeComp) && AttributeComp->IsAlive())
+		{
+			NrOfAliveBots++;
+		}
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("Found %i alive bots."), NrOfAliveBots);
+
+	float MaxBotCount = 10.0f;
+
+	if (DifficultyCurve)
+	{
+		//In case we have a Difficulty Curve, the maximum number of Bots spawned is depended by the value of the curve at time X.
+
+		//The time is just the X Axis
+		// At time 0 -> Value(Spawn 1 Enemy)
+		MaxBotCount = DifficultyCurve->GetFloatValue(GetWorld()->TimeSeconds);
+	}
+
+
+	if (NrOfAliveBots >= MaxBotCount)
+	{
+		// we exit the function (hence not spawn anymore)
+		UE_LOG(LogTemp, Log, TEXT("At maximum bot capacity. Skipping bot spawn."));
+		return;
+	}
+
+
 	// Gives us the event trigger once we're finally done (it runs multiple frames).
+	// Runs the EQS in case the number of bots is less than Max.
 	UEnvQueryInstanceBlueprintWrapper* QueryInstance =  UEnvQueryManager::RunEQSQuery(this, SpawnBotQuery, this, EEnvQueryRunMode::RandomBest5Pct, nullptr);
 	if(ensure(QueryInstance))
 	{
@@ -50,44 +90,15 @@ void ASGameModeBase::OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryIn
 		return;
 	}
 
-	// Every time we hit this query we can find what is the number of alive bots at this point in time
-	int32 NrOfAliveBots = 0;
-	// Better version of "Get Actor by class" by letting us specify which class we want to grab.
-	// Let us get a pointer to all of the instances of our characters in the world
-	for(TActorIterator<ASAICharacter> It(GetWorld()); It; ++It)
-	{
-		ASAICharacter* Bot = *It;
-
-		USAttributeComponent* AttributeComp = Cast<USAttributeComponent>(Bot->GetComponentByClass(USAttributeComponent::StaticClass()));
-		if(AttributeComp && AttributeComp->IsAlive())
-		{
-			NrOfAliveBots++;
-		}
-	}
-	float MaxBotCount = 10.0f;
-
-	if (DifficultyCurve)
-	{
-		//In case we have a Difficulty Curve, the maximum number of Bots spawned is depended by the value of the curve at time X.
-
-		//The time is just the X Axis
-		// At time 0 -> Value(Spawn 1 Enemy)
-		MaxBotCount = DifficultyCurve->GetFloatValue(GetWorld()->TimeSeconds);
-	}
-
-
-	if(NrOfAliveBots >= MaxBotCount)
-	{
-		// we exit the function (hence not spawn anymore)
-		return;
-	}
-
 
 	TArray<FVector> Locations = QueryInstance->GetResultsAsLocations();
 	
 	if(Locations.IsValidIndex(0))
 	{
 		GetWorld()->SpawnActor<AActor>(MinionClass, Locations[0], FRotator::ZeroRotator);
+
+		// Track all the used spawn locations.
+		DrawDebugSphere(GetWorld(), Locations[0], 50.0f, 20, FColor::Blue, false, 60.0f);
 
 	}
 }

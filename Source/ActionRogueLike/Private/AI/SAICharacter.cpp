@@ -4,6 +4,7 @@
 #include "AI/SAICharacter.h"
 
 #include "AIController.h"
+#include "BrainComponent.h"
 #include "SAttributeComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/PawnSensingComponent.h"
@@ -85,19 +86,36 @@ void ASAICharacter::OnHealthChanged(AActor* InstigatorActor, USAttributeComponen
 {
 	if (Delta < 0.0f)
 	{
-		//AAIController* AIC = Cast<AAIController>(GetController());
+		// When we just died
+		if(NewHealth <= 0.0f)
+		{
+			// Stop the behavior tree (Get the BT from controller)
+			AAIController* AIC = Cast<AAIController>(GetController());
 
-		//if(AIC)
-		//{
-		//UBlackboardComponent* BBComp = AIC->GetBlackboardComponent();
-		//BBComp->SetValueAsFloat("AICurrentHealth", NewHealth);
-		//}
+			// Make sure that is not a null pointer (maybe some other code earlier in the chain will already remove that AI controller from us)
+			if(AIC)
+			{
+				//GetBrainComponent the base class of BT
+				AIC->GetBrainComponent()->StopLogic("Killed");
+			}
+
+
+			// GOAL : RAGDOLL - See the corpse falling on the ground
+			// We use GetMesh because they marked it as private
+			// Set all the of the "bones" to simulate physics.
+			GetMesh()->SetAllBodiesSimulatePhysics(true);
+			// Use the collision profile named Ragdoll which has collission enabled for query and physics!
+			GetMesh()->SetCollisionProfileName("Ragdoll");
+
+			// Set lifespan (how long until we call destroy Actor on ourselves)
+			SetLifeSpan(10.0f);
+		}
 	}
 //
 //	// If the health of the character is below 0 and the delta was a "Damage Hit" then it means that he is dead and we disable the Player Controls.  
 	if (NewHealth <= 0.0f && Delta < 0.0f)
 	{
-		Destroy();
+		//Destroy();
 		//APlayerController* PC = Cast<APlayerController>(GetController());
 		//DisableInput(PC);
 	}
