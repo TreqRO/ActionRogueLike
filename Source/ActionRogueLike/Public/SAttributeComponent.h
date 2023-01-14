@@ -16,6 +16,8 @@ class ACTIONROGUELIKE_API USAttributeComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:	
+	// Static functions (since it's static we can call it anywhere in the code!)
+	// Plus they can be called in Blueprints as welL!
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
 	static USAttributeComponent* GetAttributes(AActor* FromActor);
 
