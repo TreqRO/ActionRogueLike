@@ -48,7 +48,12 @@ void ASMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent,
 
 			// Now if we hit whoever has the attribute (it doesn't have to be the character, it can be also the explosive barrel), the health
 			// will be reduce by 20. 
-			AttributeComp->ApplyHealthChange(this, -DamageAmount);
+			AttributeComp->ApplyHealthChange(GetInstigator(), -DamageAmount);
+
+			//Only Explode when we hit something valid
+			// Added by him
+			Explode();
+
 			Destroy();
 		}
 	}

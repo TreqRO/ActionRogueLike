@@ -45,6 +45,8 @@ protected:
 	UFUNCTION()
 	void OnPawnSeen(APawn* Pawn);
 
+	void SetTargetActor(AActor* NewTarget);
+
 	void SetInBBInitialHealth();
 
 	virtual void PostInitializeComponents() override;

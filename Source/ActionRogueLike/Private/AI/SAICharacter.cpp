@@ -69,23 +69,37 @@ void ASAICharacter::PostInitializeComponents()
 
 void ASAICharacter::OnPawnSeen(APawn* Pawn)
 {
+
+	SetTargetActor(Pawn);
+	// At the location of the actor draw a debug string so that we have something where the play has been spotted 
+	DrawDebugString(GetWorld(), GetActorLocation(), "PLAYER SPOTTED", nullptr, FColor::White, 4.0f, true);
+}
+
+void ASAICharacter::SetTargetActor(AActor* NewTarget)
+{
 	AAIController* AIC = Cast<AAIController>(GetController());
-	if(AIC)
+	if (AIC)
 	{
-		UBlackboardComponent* BBComp = AIC->GetBlackboardComponent();
-
-		BBComp->SetValueAsObject("TargetActor", Pawn);
-
-		// At the location of the actor draw a debug string so that we have something where the play has been spotted 
-		DrawDebugString(GetWorld(), GetActorLocation(), "PLAYER SPOTTED", nullptr, FColor::White, 4.0f, true);
+		AIC->GetBlackboardComponent()->SetValueAsObject("TargetActor", NewTarget);;
 	}
+
 }
 
 void ASAICharacter::OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth,
 	float Delta)
 {
+	
 	if (Delta < 0.0f)
 	{
+
+		// Allow the AI to react to damage by setting the Target Actor.
+		//Whenever the bot takes damage, he will use the InstigatorActor that we have available and se our Target Actor to that instigator. 
+		//Make sure that firstly we don't hit ourselves. 
+		if(InstigatorActor != this)
+		{
+			SetTargetActor(InstigatorActor);
+		}
+
 		// When we just died
 		if(NewHealth <= 0.0f)
 		{
