@@ -101,8 +101,10 @@ void ASAICharacter::OnHealthChanged(AActor* InstigatorActor, USAttributeComponen
 		{
 			SetTargetActor(InstigatorActor);
 		}
+
+		// TL;DR: Add the Hit Flash to the AI
 		// If he is damaged, then show the hit flash of the AI!
-		// Also make sure to make a small update to the minion ranged material 
+		// Also make sure to make a small update to the minion ranged material (drag and drop the material function created previously!)
 		GetMesh()->SetScalarParameterValueOnMaterials(TimeToHitParamName, GetWorld()->TimeSeconds);
 
 		// When we just died
